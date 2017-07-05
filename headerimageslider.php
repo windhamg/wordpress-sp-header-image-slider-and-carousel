@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: WP Header image slider and carousel 
+ * Plugin Name: WP Header image slider and carousel
  * Plugin URL: https://www.wponlinesupport.com/
  * Description: A simple Header image slider plugin
  * Version: 1.3
@@ -15,7 +15,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
 
 /**
  * Basic plugin definitions
- * 
+ *
  * @package WP Header image slider and carousel
  * @since 1.0.0
  */
@@ -38,7 +38,7 @@ if( !defined( 'SPHIS_META_PREFIX' ) ) {
 /**
  * Load Text Domain
  * This gets the plugin ready for translation
- * 
+ *
  * @package WP Header image slider and carousel
  * @since 1.1
  */
@@ -93,12 +93,12 @@ add_action('init', 'wphimgs_imageslider_setup_post_types');
  */
 
 function wphimgs_imageslider_shortcode( $atts, $content = null ) {
-	
+
 	extract(shortcode_atts(array(
 		'limit' 			=> '-1',
 		'effect'			=> 'horizontal',
 		'captions'			=> 'true',
-		'autoplay'			=> 'true',		
+		'autoplay'			=> 'true',
 		'speed'				=> 2000,
 		'slide_margin'		=> 10,
 		'auto_controls'		=> 'true',
@@ -108,7 +108,7 @@ function wphimgs_imageslider_shortcode( $atts, $content = null ) {
 		'autoplay_interval'	=> 4000,
 		'dots'              => 'true',
 	), $atts));
-	
+
 	$limit 				= !empty($limit) ? $limit : '-1';
 	$captions			= ($captions == 'true') 		? 1 : 0;
 	$autoplay			= ($autoplay == 'true') 		? 1 : 0;
@@ -127,39 +127,46 @@ function wphimgs_imageslider_shortcode( $atts, $content = null ) {
 	$post_type 		= 'sp_imageslider';
 	$orderby 		= 'post_date';
 	$order 			= 'DESC';
-				
-	$query = new WP_Query( array ( 
+
+	$query = new WP_Query( array (
 								'post_type'      => $post_type,
 								'posts_per_page' => $limit,
-								'orderby'        => $orderby, 
+								'orderby'        => $orderby,
 								'order'          => $order,
 								'no_found_rows'  => 1
-								) 
+								)
 						);
-	
+
 	//Get post type count
 	$post_count = $query->post_count;
-	$i = 1;	
+	$i = 1;
 	if( $post_count > 0) :
 	?>
-	
+
 	<ul class="wphimgs-slides">
-		<?php while ($query->have_posts()) : $query->the_post(); $feat_image = wp_get_attachment_url( get_post_thumbnail_id() ); ?>
-				
-			<li><img src="<?php echo $feat_image; ?>" title="<?php the_title(); ?>" alt="" ></li>
-		
+		<?php while ($query->have_posts()) : $query->the_post(); $feat_image = wp_get_attachment_url( get_post_thumbnail_id() );
+			$link_val = get_post_meta(get_the_ID(), SPHIS_META_PREFIX.'slide_link', true);
+			$target_val = (get_post_meta(get_the_ID(), SPHIS_META_PREFIX.'link_behaviour', true) == '1') ? '_blank' : '_self';
+		?>
+			<li>
+				 <?php echo ((strlen($link_val) > 0) ? '<a href="' . $link_val . '" target="' . $target_val . '">' : '') ?>
+				 <img src="<?php echo $feat_image; ?>" title="<?php the_title(); ?>" alt="" >
+				 <?php echo ((strlen($link_val) > 0) ? '</a>' : '') ?>
+			</li>
+
+
 		<?php $i++; endwhile; ?>
-	</ul>		
+	</ul>
 	<?php else : ?>
-		
-		<ul class="wphimgs-slides">			
-			<li> <img src="<?php echo  plugin_dir_url( __FILE__ ); ?>/images/slide-1.jpg" title="First Image"  alt="" ></li>	
+
+		<ul class="wphimgs-slides">
+			<li> <img src="<?php echo  plugin_dir_url( __FILE__ ); ?>/images/slide-1.jpg" title="First Image"  alt="" ></li>
 			<li><img src="<?php echo  plugin_dir_url( __FILE__ ); ?>/images/slide-2.jpg" title="Second Image"  alt=""></li>
 			<li><img src="<?php echo  plugin_dir_url( __FILE__ ); ?>/images/slide-3.jpg" title="Third Image" alt=""></li>
 		</ul>
-		
-	<?php	
-	endif ;	
+
+	<?php
+	endif ;
 	wp_reset_query();
 ?>
 
@@ -170,14 +177,14 @@ function wphimgs_imageslider_shortcode( $atts, $content = null ) {
 			  captions 		: <?php echo $captions; ?>,
 			  auto 			: <?php echo $autoplay; ?>,
 			  pause 		: <?php echo $autoplay_interval; ?>,
-			  speed 		: <?php echo $speed; ?>,			  
+			  speed 		: <?php echo $speed; ?>,
 			  slideMargin	: <?php echo $slide_margin; ?>,
 			  autoControls	: <?php echo $auto_controls; ?>,
 			  infiniteLoop	: <?php echo $loop; ?>,
 			  startSlide	: <?php echo $start_slide; ?>,
 			  randomStart	: <?php echo $random_start; ?>,
 			  pager         : <?php echo $dots; ?>
-			 
+
 		});
 	});
 	</script>
@@ -193,11 +200,11 @@ add_shortcode("sp_imageslider", "wphimgs_imageslider_shortcode");
  */
 
 function wphimgs_imagecarousel_shortcode( $atts, $content = null ) {
-	
+
 	extract(shortcode_atts(array(
 		'limit' 		=> '-1',
 		'slide_width'	=> '600',
-		'autoplay'			=> 'true',	
+		'autoplay'			=> 'true',
 		'autoplay_interval'	=> 4000,
 		'min_slides'	=> 2,
 		'max_slides'	=> 2,
@@ -205,7 +212,7 @@ function wphimgs_imagecarousel_shortcode( $atts, $content = null ) {
 		'slide_margin'	=> 10,
 		'dots'          => 'true',
 	), $atts));
-	
+
 	$limit = !empty($limit) ? $limit : '-1';
 	$slide_width		= ( !empty($slide_width) && is_numeric($slide_width) ) 		? $slide_width 	: 600;
 	$autoplay			= ($autoplay == 'true') 		? 1 : 0;
@@ -215,54 +222,61 @@ function wphimgs_imagecarousel_shortcode( $atts, $content = null ) {
 	$speed				= ( !empty($speed) && is_numeric($speed) ) ? $speed : 3000;
 	$slide_margin		= ( !empty($slide_margin) && is_numeric($slide_margin) ) 	? $slide_margin : 10;
 	$dots				= ($dots == 'true')		? 1 : 0;
-	
+
 	ob_start();
 
 	// Create the Query
 	$post_type 		= 'sp_imageslider';
 	$orderby 		= 'post_date';
 	$order 			= 'DESC';
-				
-	$query = new WP_Query( array ( 
+
+	$query = new WP_Query( array (
 								'post_type'      => $post_type,
 								'posts_per_page' => $limit,
-								'orderby'        => $orderby, 
+								'orderby'        => $orderby,
 								'order'          => $order,
 								'no_found_rows'  => 1
-								) 
+								)
 						);
-	
+
 	//Get post type count
 	$post_count = $query->post_count;
-	$i = 1;	
+	$i = 1;
 	if( $post_count > 0) :
 	?>
-	
-	<ul class="wphimgs-carousel">	
-			
-	<?php		
+
+	<ul class="wphimgs-carousel">
+
+	<?php
 		while ($query->have_posts()) : $query->the_post();
 		$feat_image = wp_get_attachment_url( get_post_thumbnail_id() );
+		$link_val = get_post_meta(get_the_ID(), SPHIS_META_PREFIX.'slide_link', true);
+		$target_val = (get_post_meta(get_the_ID(), SPHIS_META_PREFIX.'link_behaviour', true) == '1') ? '_blank' : '_self';
 		?>
-		<li> <img src="<?php echo $feat_image; ?>" title="<?php the_title(); ?>"  alt="" >	 </li>	
+		<li>
+			 <?php echo ((strlen($link_val) > 0) ? '<a href="' . $link_val . '" target="' . $target_val . '">' : '') ?>
+			 <img src="<?php echo $feat_image; ?>" title="<?php the_title(); ?>" alt="" >
+			 <?php echo ((strlen($link_val) > 0) ? '</a>' : '') ?>
+		</li>
+
 		<?php
 		$i++;
-		endwhile; ?>			
-		</ul>		
+		endwhile; ?>
+		</ul>
 <?php	else : ?>
-	
-		<ul class="wphimgs-carousel">			
-				<li> <img src="<?php echo  plugin_dir_url( __FILE__ ); ?>/images/slide-1.jpg" title="First Image"  alt="" >	 </li>	
+
+		<ul class="wphimgs-carousel">
+				<li> <img src="<?php echo  plugin_dir_url( __FILE__ ); ?>/images/slide-1.jpg" title="First Image"  alt="" >	 </li>
 				 <li> <img src="<?php echo  plugin_dir_url( __FILE__ ); ?>/images/slide-2.jpg" title="Second Image"  alt="">	</li>
-				<li>  <img src="<?php echo  plugin_dir_url( __FILE__ ); ?>/images/slide-3.jpg" title="Third Image" alt=""></li>		
-					
-		</ul>		
-	
-	<?php	
-	endif ;	
+				<li>  <img src="<?php echo  plugin_dir_url( __FILE__ ); ?>/images/slide-3.jpg" title="Third Image" alt=""></li>
+
+		</ul>
+
+	<?php
+	endif ;
 	wp_reset_query();
 ?>
-	
+
 	<script type="text/javascript">
 	jQuery(function(){
 		jQuery('.wphimgs-carousel').bxSlider({
@@ -290,7 +304,7 @@ add_shortcode("sp_imagecarousel", "wphimgs_imagecarousel_shortcode");
  */
 
 function wphimgs_imageThumbnailpager_shortcode( $atts, $content = null ) {
-	
+
 	extract(shortcode_atts(array(
 		'limit' 			=> '-1',
 		'effect'			=> 'horizontal',
@@ -304,7 +318,7 @@ function wphimgs_imageThumbnailpager_shortcode( $atts, $content = null ) {
 		'random_start'		=> 'false',
 		'autoplay_interval'	=> 3000,
 	), $atts));
-	
+
 	$limit 				= !empty($limit) ? $limit : '-1';
 	$captions			= ($captions == 'true') 		? 1 : 0;
 	$autoplay			= ($autoplay == 'true') 		? 1 : 0;
@@ -322,43 +336,50 @@ function wphimgs_imageThumbnailpager_shortcode( $atts, $content = null ) {
 	$post_type 		= 'sp_imageslider';
 	$orderby 		= 'post_date';
 	$order 			= 'DESC';
-				
-	$query = new WP_Query( array ( 
+
+	$query = new WP_Query( array (
 								'post_type'      => $post_type,
 								'posts_per_page' => $limit,
-								'orderby'        => $orderby, 
+								'orderby'        => $orderby,
 								'order'          => $order,
 								'no_found_rows'  => 1
-								) 
+								)
 						);
-	
+
 	//Get post type count
 	$post_count = $query->post_count;
-	$i = 1;	
+	$i = 1;
 	if( $post_count > 0) :
 	?>
-	
-	<ul class="wphimgs-thumbnail">		
+
+	<ul class="wphimgs-thumbnail">
 		<?php while($query->have_posts()) : $query->the_post();
 
 			$feat_image = wp_get_attachment_url( get_post_thumbnail_id() ); ?>
-		
-			<li><img src="<?php echo $feat_image; ?>" title="<?php the_title(); ?>"  alt="" ></li>
-		
+			$link_val = get_post_meta(get_the_ID(), SPHIS_META_PREFIX.'slide_link', true);
+			$target_val = (get_post_meta(get_the_ID(), SPHIS_META_PREFIX.'link_behaviour', true) == '1') ? '_blank' : '_self';
+
+			<li>
+				 <?php echo ((strlen($link_val) > 0) ? '<a href="' . $link_val . '" target="' . $target_val . '">' : '') ?>
+				 <img src="<?php echo $feat_image; ?>" title="<?php the_title(); ?>" alt="" >
+				 <?php echo ((strlen($link_val) > 0) ? '</a>' : '') ?>
+			</li>
+
+
 		<?php $i++; endwhile; ?>
 	</ul>
-	
+
 	<div class="wphimgs-pager">
 		<?php $j = 0; while ($query->have_posts()) : $query->the_post(); ?>
 
 	  		<a data-slide-index="<?php echo $j; ?>" href=""><?php the_post_thumbnail(array(80,80)); ?></a>
 
 		<?php $j++; endwhile; ?>
-	</div>		
+	</div>
 
 <?php else : ?>
-	
-	<ul class="wphimgs-thumbnail">			
+
+	<ul class="wphimgs-thumbnail">
 		<li><img src="<?php echo  plugin_dir_url( __FILE__ ); ?>/images/slide-1.jpg" title="First Image"  alt="" ></li>
 		<li><img src="<?php echo  plugin_dir_url( __FILE__ ); ?>/images/slide-2.jpg" title="Second Image"  alt=""></li>
 		<li><img src="<?php echo  plugin_dir_url( __FILE__ ); ?>/images/slide-3.jpg" title="Third Image" alt=""></li>
@@ -367,9 +388,9 @@ function wphimgs_imageThumbnailpager_shortcode( $atts, $content = null ) {
 		<a data-slide-index="0" href=""><img src="<?php echo  plugin_dir_url( __FILE__ ); ?>/images/slide-1.jpg" width="100px"/></a>
 		<a data-slide-index="1" href=""><img src="<?php echo  plugin_dir_url( __FILE__ ); ?>/images/slide-1.jpg" width="100px"/></a>
 		<a data-slide-index="2" href=""><img src="<?php echo  plugin_dir_url( __FILE__ ); ?>/images/slide-1.jpg" width="100px"/></a>
-	</div>		
-	
-<?php endif;	
+	</div>
+
+<?php endif;
 	wp_reset_query();
 ?>
 
@@ -380,12 +401,12 @@ function wphimgs_imageThumbnailpager_shortcode( $atts, $content = null ) {
 			captions 		: <?php echo $captions; ?>,
 			auto 			: <?php echo $autoplay; ?>,
 			pause 			: <?php echo $autoplay_interval; ?>,
-			speed 			: <?php echo $speed; ?>,			  
+			speed 			: <?php echo $speed; ?>,
 			slideMargin 	: <?php echo $slide_margin; ?>,
 			autoControls 	: <?php echo $auto_controls; ?>,
 			infiniteLoop 	: <?php echo $loop; ?>,
 			startSlide 		: <?php echo $start_slide; ?>,
-			randomStart 	: <?php echo $random_start; ?>,	
+			randomStart 	: <?php echo $random_start; ?>,
 			pagerCustom 	: '.wphimgs-pager'
 		});
 	});
@@ -397,7 +418,7 @@ function wphimgs_imageThumbnailpager_shortcode( $atts, $content = null ) {
 add_shortcode("sp_imagethumbnail_pager", "wphimgs_imageThumbnailpager_shortcode");
 
 add_action( 'wp_enqueue_scripts','wphimgs_style_css' );
-function wphimgs_style_css() {	
+function wphimgs_style_css() {
 	wp_enqueue_style( 'wphimgs_slidercss',  plugin_dir_url( __FILE__ ). 'css/jquery.bxslider.css', array(), SPHIS_VERSION );
 	wp_enqueue_script( 'wpfcas_slick_jquery', plugin_dir_url( __FILE__ ) . 'js/jquery.bxslider.min.js', array('jquery'), SPHIS_VERSION );
 }
@@ -406,7 +427,7 @@ function wphimgs_style_css() {
 require_once( SPHIS_DIR . '/includes/admin/class-sphis-admin.php' );
 
 // Load admin side files
-if ( is_admin() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {   
+if ( is_admin() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
     // Designs file
     include_once( SPHIS_DIR . '/includes/admin/wp-sphis-how-it-work.php' );
 }
